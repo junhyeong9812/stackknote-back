@@ -1,0 +1,148 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.stacknote'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// ---------------------------
+	// Spring Boot Starter
+	// ---------------------------
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// 개발 편의성
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// ---------------------------
+	// Spring Boot Test
+	// ---------------------------
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// ---------------------------
+	// Lombok
+	// ---------------------------
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// ---------------------------
+	// Database
+	// ---------------------------
+	// PostgreSQL (운영 DB)
+	runtimeOnly 'org.postgresql:postgresql'
+	// H2 (개발/테스트용)
+	runtimeOnly 'com.h2database:h2'
+
+	// ---------------------------
+	// QueryDSL
+	// ---------------------------
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	// ---------------------------
+	// 추가 라이브러리 (StackNote 특화)
+	// ---------------------------
+	// JSON 처리
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// JWT 인증
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	// 마크다운 처리
+	implementation 'com.vladsch.flexmark:flexmark:0.64.8'
+	implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.64.8'
+	implementation 'com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:0.64.8'
+	implementation 'com.vladsch.flexmark:flexmark-ext-autolink:0.64.8'
+
+	// 파일 업로드/처리
+	implementation 'commons-io:commons-io:2.11.0'
+	implementation 'org.apache.tika:tika-core:2.9.1'
+
+	// 유틸리티
+	implementation 'org.apache.commons:commons-lang3:3.13.0'
+
+	// .env 파일 지원
+	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+	// API 문서화
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+	// SQL 로깅 (개발용)
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// ---------------------------
+// QueryDSL 설정
+// ---------------------------
+sourceSets {
+	main {
+		java {
+			srcDirs += file("$buildDir/generated/querydsl")
+		}
+	}
+}
+
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs << "-parameters"
+	options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+// QueryDSL Q클래스 생성 태스크
+task cleanQuerydsl(type: Delete) {
+	delete file("$buildDir/generated/querydsl")
+}
+
+compileJava {
+	dependsOn cleanQuerydsl
+	options.annotationProcessorGeneratedSourcesDirectory = file("$buildDir/generated/querydsl")
+}
+
+// ---------------------------
+// 빌드 최적화
+// ---------------------------
+jar {
+	enabled = false
+}
+
+bootJar {
+	archiveFileName = 'stacknote-api.jar'
+}
