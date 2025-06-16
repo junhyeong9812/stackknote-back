@@ -370,17 +370,6 @@ curl http://localhost:8080/api/actuator/health/db
 - **개발환경**: DEBUG (상세한 로그)
 - **운영환경**: INFO (필요한 정보만)
 
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
 
 ## 🔗 관련 링크
 
