@@ -1,43 +1,46 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /api
+# StackNote Backend Application Configuration
 
+# 공통 설정
 spring:
+  application:
+    name: stacknote-backend
+  
   profiles:
     active: dev
-
-  # 공통 JPA 설정
-  jpa:
-    properties:
-      hibernate:
-        format_sql: true
-    open-in-view: false
-
+  
   # 파일 업로드 설정
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
-  # JSON 설정
-  jackson:
-    time-zone: Asia/Seoul
-    serialization:
-      write-dates-as-timestamps: false
+# 서버 설정
+server:
+  port: 8080
+  servlet:
+    context-path: /api
 
 # JWT 설정
 jwt:
-  secret: ${JWT_SECRET:local-development-secret-key}
-  expiration: 86400000
+  secret: stacknote-jwt-secret-key-for-development-environment-should-be-changed-in-production
+  access-token-validity: 30    # 액세스 토큰 유효기간 (분)
+  refresh-token-validity: 120  # 리프레시 토큰 유효기간 (분)
 
-# 파일 저장 경로
+# 앱 설정
+app:
+  domain: localhost
+  secure-cookies: false  # 개발환경에서는 false, 운영에서는 true
+
+# 파일 업로드 경로
 file:
-  upload-dir: ${user.dir}/images
+  upload:
+    path: uploads/
 
 # Swagger 설정
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    display-request-duration: true
+    groups-order: DESC

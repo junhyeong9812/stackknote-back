@@ -103,6 +103,8 @@ public class AuthCommandService {
         log.info("사용자 로그인 완료: {}", user.getEmail());
 
         return AuthTokenResponse.of(
+                accessTokenValue,
+                refreshTokenValue,
                 accessToken.getExpiresAt(),
                 refreshToken.getExpiresAt(),
                 UserResponse.from(user)
@@ -132,6 +134,8 @@ public class AuthCommandService {
         log.info("토큰 갱신 완료: {}", user.getEmail());
 
         return AuthTokenResponse.of(
+                newAccessTokenValue,
+                refreshTokenValue,
                 newAccessToken.getExpiresAt(),
                 refreshToken.getExpiresAt(),
                 UserResponse.from(user)
