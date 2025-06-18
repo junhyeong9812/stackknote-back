@@ -30,6 +30,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -54,6 +57,10 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // 인증 실패 시 처리
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
                 // URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 인증 관련 엔드포인트는 모든 사용자 허용
@@ -75,11 +82,12 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // H2 콘솔을 위한 프레임 옵션 비활성화
-                .headers(headers -> headers.frameOptions().disable());
+                // H2 콘솔을 위한 프레임 옵션 설정 (개발용)
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
-        // JWT 필터 추가 (추후 구현)
-        // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // JWT 필터 추가
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
