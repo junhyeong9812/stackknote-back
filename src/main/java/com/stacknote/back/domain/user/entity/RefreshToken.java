@@ -66,4 +66,6 @@ public class RefreshToken extends BaseTimeEntity {
     public void revoke() {
         this.isRevoked = true;
     }
+
+
 }

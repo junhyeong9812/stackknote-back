@@ -49,4 +49,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
      */
     @Query("SELECT COUNT(rt) FROM RefreshToken rt WHERE rt.user = :user AND rt.isRevoked = false AND rt.expiresAt > :now")
     long countValidTokensByUser(@Param("user") User user, @Param("now") LocalDateTime now);
+
+    /**
+     * 사용자의 모든 리프레시 토큰 완전 삭제 (스케줄러용 - 계정 삭제 시)
+     */
+    void deleteAllByUser(User user);
 }

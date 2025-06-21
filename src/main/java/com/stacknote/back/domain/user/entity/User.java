@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -47,6 +48,13 @@ public class User extends BaseEntity implements UserDetails {
     @Builder.Default
     private Boolean isActive = true;
 
+    /**
+     * 계정 비활성화 날짜
+     * 비활성화된 계정이 3개월 후 자동 삭제되도록 하기 위한 필드
+     */
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
     // ===== 비즈니스 로직 메서드 =====
 
     /**
@@ -80,6 +88,7 @@ public class User extends BaseEntity implements UserDetails {
      */
     public void deactivate() {
         this.isActive = false;
+        this.deactivatedAt = LocalDateTime.now();
     }
 
     /**
@@ -87,6 +96,24 @@ public class User extends BaseEntity implements UserDetails {
      */
     public void activate() {
         this.isActive = true;
+        this.deactivatedAt = null; // 비활성화 날짜 삭제
+    }
+
+    /**
+     * 비활성화 후 경과 시간 확인 (개월 단위)
+     */
+    public long getMonthsSinceDeactivation() {
+        if (deactivatedAt == null) {
+            return 0;
+        }
+        return java.time.temporal.ChronoUnit.MONTHS.between(deactivatedAt, LocalDateTime.now());
+    }
+
+    /**
+     * 3개월 이상 비활성화된 계정인지 확인
+     */
+    public boolean isEligibleForDeletion() {
+        return deactivatedAt != null && getMonthsSinceDeactivation() >= 3;
     }
 
     // ===== UserDetails 구현 =====

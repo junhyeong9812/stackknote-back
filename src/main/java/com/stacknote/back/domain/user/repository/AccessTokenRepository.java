@@ -49,4 +49,9 @@ public interface AccessTokenRepository extends JpaRepository<AccessToken, Long> 
      */
     @Query("SELECT COUNT(at) FROM AccessToken at WHERE at.user = :user AND at.isRevoked = false AND at.expiresAt > :now")
     long countValidTokensByUser(@Param("user") User user, @Param("now") LocalDateTime now);
+
+    /**
+     * 사용자의 모든 액세스 토큰 완전 삭제 (스케줄러용 - 계정 삭제 시)
+     */
+    void deleteAllByUser(User user);
 }
