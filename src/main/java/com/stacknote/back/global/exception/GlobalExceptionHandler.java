@@ -1,5 +1,13 @@
 package com.stacknote.back.global.exception;
 
+import com.stacknote.back.domain.comment.exception.CommentAccessDeniedException;
+import com.stacknote.back.domain.comment.exception.CommentNotFoundException;
+import com.stacknote.back.domain.comment.exception.InvalidCommentException;
+import com.stacknote.back.domain.notification.exception.NotificationAccessDeniedException;
+import com.stacknote.back.domain.notification.exception.NotificationNotFoundException;
+import com.stacknote.back.domain.tag.exception.DuplicateTagException;
+import com.stacknote.back.domain.tag.exception.TagInUseException;
+import com.stacknote.back.domain.tag.exception.TagNotFoundException;
 import com.stacknote.back.domain.user.exception.DuplicateEmailException;
 import com.stacknote.back.domain.user.exception.InvalidPasswordException;
 import com.stacknote.back.domain.user.exception.UserNotFoundException;
@@ -92,6 +100,127 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 댓글 도메인 예외 처리
+     */
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleCommentNotFoundException(CommentNotFoundException e) {
+        log.warn("Comment not found: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.COMMENT_NOT_FOUND.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    @ExceptionHandler(CommentAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleCommentAccessDeniedException(CommentAccessDeniedException e) {
+        log.warn("Comment access denied: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.COMMENT_ACCESS_DENIED.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    @ExceptionHandler(InvalidCommentException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleInvalidCommentException(InvalidCommentException e) {
+        log.warn("Invalid comment: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.INVALID_COMMENT_CONTENT.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
+     * 태그 도메인 예외 처리
+     */
+    @ExceptionHandler(TagNotFoundException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleTagNotFoundException(TagNotFoundException e) {
+        log.warn("Tag not found: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.TAG_NOT_FOUND.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    @ExceptionHandler(DuplicateTagException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleDuplicateTagException(DuplicateTagException e) {
+        log.warn("Duplicate tag name: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.DUPLICATE_TAG_NAME.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    @ExceptionHandler(TagInUseException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleTagInUseException(TagInUseException e) {
+        log.warn("Tag in use: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.TAG_IN_USE.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
+     * 알림 도메인 예외 처리
+     */
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleNotificationNotFoundException(NotificationNotFoundException e) {
+        log.warn("Notification not found: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.NOTIFICATION_NOT_FOUND.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    @ExceptionHandler(NotificationAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleNotificationAccessDeniedException(NotificationAccessDeniedException e) {
+        log.warn("Notification access denied: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.NOTIFICATION_ACCESS_DENIED.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
      * 인증/인가 예외 처리
      */
     @ExceptionHandler(UnauthorizedException.class)
@@ -163,6 +292,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.error("지원하지 않는 HTTP 메서드입니다.", errorResponse));
+    }
+
+    /**
+     * IllegalArgumentException 처리
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.warn("Illegal argument: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.INVALID_INPUT_VALUE.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
     }
 
     /**
