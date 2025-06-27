@@ -1,5 +1,7 @@
-package com.stacknote.back.global.security;
+package com.stacknote.back.global.security.config;
 
+import com.stacknote.back.global.security.JwtAuthenticationEntryPoint;
+import com.stacknote.back.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +23,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 /**
- * Spring Security 설정
- * JWT 기반 인증, CORS 설정 등
+ * Spring Security 설정 - Filter 기반 인증으로 확장
+ * 기존 JWT 필터에 CustomLogin, TokenReissue 필터 추가
  */
 @Configuration
 @EnableWebSecurity
@@ -47,46 +49,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 비활성화 (JWT 사용)
+                // 기본 설정 (기존과 동일)
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // CORS 설정
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // 세션 사용하지 않음 (JWT 사용)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 인증 실패 시 처리
                 .exceptionHandling(exceptions ->
                         exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // URL별 권한 설정
+                // 커스텀 필터 설정 - 새로 추가된 부분
+                .with(new CustomLoginConfigurer(), configurer -> {
+                    configurer.loginProcessingUrl("/api/auth/login");
+                })
+                .with(new TokenReissueConfigurer(), configurer -> {
+                    configurer.reissueUrl("/api/auth/refresh");
+                })
+
+                // URL별 권한 설정 - 필터 처리 URL 고려
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 관련 엔드포인트는 모든 사용자 허용
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // 회원가입, 상태확인은 여전히 Controller에서 처리
+                        .requestMatchers("/api/auth/register", "/api/auth/status").permitAll()
 
-                        // H2 콘솔 접근 허용 (개발용)
+                        // 로그인, 토큰갱신은 필터에서 처리하므로 permitAll
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+
+                        // 로그아웃은 여전히 Controller에서 처리 (인증 필요)
+                        .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
+
+                        // 기타 설정 (기존과 동일)
                         .requestMatchers("/h2-console/**").permitAll()
-
-                        // Swagger UI 접근 허용
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-                        // 헬스체크 엔드포인트 허용
                         .requestMatchers("/actuator/health").permitAll()
-
-                        // 파일 업로드/다운로드 (인증 필요)
                         .requestMatchers("/api/files/**").authenticated()
-
-                        // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
-
-                // H2 콘솔을 위한 프레임 옵션 설정 (개발용)
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
-        // JWT 필터 추가
+        // JWT 필터는 기존 위치에 유지 (다른 필터들보다 먼저 실행)
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -95,25 +95,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // 허용할 Origin 설정
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-
-        // 허용할 HTTP 메서드
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 허용할 헤더
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 자격증명 허용
         configuration.setAllowCredentials(true);
-
-        // 노출할 헤더
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

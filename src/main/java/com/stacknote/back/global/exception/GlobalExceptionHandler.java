@@ -13,13 +13,20 @@ import com.stacknote.back.domain.user.exception.InvalidPasswordException;
 import com.stacknote.back.domain.user.exception.UserNotFoundException;
 import com.stacknote.back.global.dto.ApiResponse;
 import com.stacknote.back.global.dto.ErrorResponse;
+import com.stacknote.back.global.exception.custom.AuthenticationProcessingException;
 import com.stacknote.back.global.exception.custom.BusinessException;
 import com.stacknote.back.global.exception.custom.EntityNotFoundException;
+import com.stacknote.back.global.exception.custom.TokenProcessingException;
 import com.stacknote.back.global.exception.custom.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 전역 예외 처리 핸들러
+ * 전역 예외 처리 핸들러 (Filter 인증 예외 처리 추가)
  * 모든 예외를 일관된 형식으로 응답
  */
 @Slf4j
@@ -51,6 +58,91 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(e.getErrorCode().getHttpStatus())
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
+     * Filter에서 발생하는 인증 처리 예외 (AuthenticationException 확장)
+     */
+    @ExceptionHandler(AuthenticationProcessingException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthenticationProcessingException(AuthenticationProcessingException e) {
+        log.error("Authentication processing error: {}", e.getMessage(), e);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode().getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
+     * 토큰 처리 예외
+     */
+    @ExceptionHandler(TokenProcessingException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleTokenProcessingException(TokenProcessingException e) {
+        log.warn("Token processing error: {}", e.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getErrorCode().getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(ApiResponse.error(e.getMessage(), errorResponse));
+    }
+
+    /**
+     * Spring Security AuthenticationException 처리 (Filter에서 발생)
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthenticationException(AuthenticationException e) {
+        log.warn("Authentication exception: {}", e.getMessage());
+
+        String message;
+        ErrorCode errorCode;
+
+        if (e instanceof BadCredentialsException) {
+            message = "이메일 또는 비밀번호가 올바르지 않습니다.";
+            errorCode = ErrorCode.INVALID_CREDENTIALS;
+        } else if (e instanceof UsernameNotFoundException) {
+            message = "존재하지 않는 사용자입니다.";
+            errorCode = ErrorCode.USER_NOT_FOUND;
+        } else if (e instanceof DisabledException) {
+            message = "비활성화된 계정입니다.";
+            errorCode = ErrorCode.ACCOUNT_DISABLED;
+        } else if (e instanceof LockedException) {
+            message = "잠긴 계정입니다.";
+            errorCode = ErrorCode.ACCOUNT_LOCKED;
+        } else {
+            message = "인증에 실패했습니다.";
+            errorCode = ErrorCode.AUTHENTICATION_FAILED;
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), message);
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(message, errorResponse));
+    }
+
+    /**
+     * IllegalStateException 처리 (Filter에서 토큰 생성 실패 시 발생)
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalStateException(IllegalStateException e) {
+        log.error("Illegal state error: {}", e.getMessage(), e);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorCode.AUTHENTICATION_PROCESSING_ERROR.getCode(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(e.getMessage(), errorResponse));
     }
 

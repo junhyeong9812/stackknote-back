@@ -6,6 +6,7 @@ import com.stacknote.back.domain.notification.dto.response.NotificationResponse;
 import com.stacknote.back.domain.notification.entity.Notification;
 import com.stacknote.back.domain.notification.service.command.NotificationCommandService;
 import com.stacknote.back.domain.user.entity.User;
+import com.stacknote.back.domain.user.repository.UserRepository;
 import com.stacknote.back.global.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationCommandController {
 
     private final NotificationCommandService notificationCommandService;
-
+    private final UserRepository userRepository;
     @Operation(summary = "알림 생성", description = "새로운 알림을 생성합니다.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -271,7 +272,8 @@ public class NotificationCommandController {
     private User getUserById(Long userId) {
         // 실제로는 UserRepository를 주입받아서 사용해야 함
         // 여기서는 간단히 구현
-        User user = new User();
+
+        User user = userRepository.findById(userId).orElseThrow();
         // user 설정...
         return user;
     }
