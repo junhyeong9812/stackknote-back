@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces/{workspaceId}/pages")
+@RequestMapping("/workspaces/{workspaceId}/pages")
 @RequiredArgsConstructor
 @Tag(name = "Page Queries", description = "페이지 조회 관리 API")
 public class PageQueryController {
@@ -247,43 +247,5 @@ public class PageQueryController {
         PageQueryService.PageStatisticsResponse statistics = pageQueryService.getWorkspacePageStatistics(workspaceId, currentUser);
 
         return ResponseEntity.ok(ApiResponse.success("페이지 통계 조회 완료", statistics));
-    }
-}
-
-/**
- * 사용자 개별 페이지 쿼리 컨트롤러
- */
-@RestController
-@RequestMapping("/api/users/pages")
-@RequiredArgsConstructor
-@Tag(name = "User Page Queries", description = "사용자 페이지 조회 API")
-class UserPageQueryController {
-
-    private final PageQueryService pageQueryService;
-
-    /**
-     * 내가 생성한 페이지 목록 조회
-     */
-    @GetMapping("/created")
-    @Operation(summary = "내가 생성한 페이지", description = "현재 사용자가 생성한 페이지 목록을 조회합니다.")
-    public ResponseEntity<ApiResponse<List<PageSummaryResponse>>> getMyCreatedPages(
-            @Parameter(description = "최대 개수") @RequestParam(defaultValue = "20") int limit,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        List<PageSummaryResponse> pages = pageQueryService.getUserCreatedPages(currentUser, limit);
-        return ResponseEntity.ok(ApiResponse.success("내가 생성한 페이지 목록 조회 완료", pages));
-    }
-
-    /**
-     * 내가 최근 수정한 페이지 목록 조회
-     */
-    @GetMapping("/recent-modified")
-    @Operation(summary = "내가 최근 수정한 페이지", description = "현재 사용자가 최근 수정한 페이지 목록을 조회합니다.")
-    public ResponseEntity<ApiResponse<List<PageSummaryResponse>>> getMyRecentlyModifiedPages(
-            @Parameter(description = "최대 개수") @RequestParam(defaultValue = "20") int limit,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        List<PageSummaryResponse> pages = pageQueryService.getUserRecentlyModifiedPages(currentUser, limit);
-        return ResponseEntity.ok(ApiResponse.success("내가 최근 수정한 페이지 목록 조회 완료", pages));
     }
 }

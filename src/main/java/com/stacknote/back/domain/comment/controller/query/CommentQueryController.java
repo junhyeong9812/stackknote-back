@@ -27,7 +27,7 @@ import java.util.List;
 @Tag(name = "댓글 조회", description = "댓글 조회 관련 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 public class CommentQueryController {
 

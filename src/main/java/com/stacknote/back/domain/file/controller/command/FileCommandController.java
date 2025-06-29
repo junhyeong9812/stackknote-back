@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces/{workspaceId}/files")
+@RequestMapping("/workspaces/{workspaceId}/files")
 @RequiredArgsConstructor
 @Tag(name = "File Commands", description = "파일 명령 관리 API")
 public class FileCommandController {

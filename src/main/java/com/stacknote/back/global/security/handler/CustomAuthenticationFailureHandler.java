@@ -78,9 +78,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             return "비활성화된 계정입니다. 관리자에게 문의하세요.";
         } else if (exception instanceof LockedException) {
             return "잠긴 계정입니다. 관리자에게 문의하세요.";
-        } else if (exception instanceof IllegalArgumentException) {
-            return exception.getMessage(); // 커스텀 메시지 사용
         } else {
+            // IllegalArgumentException 체크 제거 - AuthenticationException과 호환되지 않음
             return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
         }
     }
@@ -95,9 +94,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         } else if (exception instanceof DisabledException ||
                 exception instanceof LockedException) {
             return ErrorCode.ACCOUNT_DISABLED;
-        } else if (exception instanceof IllegalArgumentException) {
-            return ErrorCode.INVALID_INPUT;
         } else {
+            // IllegalArgumentException 체크 제거
             return ErrorCode.AUTHENTICATION_FAILED;
         }
     }

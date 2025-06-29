@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces/{workspaceId}/files")
+@RequestMapping("/workspaces/{workspaceId}/files")
 @RequiredArgsConstructor
 @Tag(name = "File Queries", description = "파일 조회 관리 API")
 public class FileQueryController {

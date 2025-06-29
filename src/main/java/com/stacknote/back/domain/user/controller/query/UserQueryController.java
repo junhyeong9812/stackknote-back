@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "User Queries", description = "사용자 조회 관리 API")
 public class UserQueryController {

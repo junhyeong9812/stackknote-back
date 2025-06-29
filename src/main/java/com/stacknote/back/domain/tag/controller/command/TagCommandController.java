@@ -25,7 +25,7 @@ import java.util.List;
 @Tag(name = "태그 관리", description = "태그 생성, 수정, 삭제 관련 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/tags")
+@RequestMapping("/tags")
 @RequiredArgsConstructor
 public class TagCommandController {
 

@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/files")
 @RequiredArgsConstructor
 @Tag(name = "File Download", description = "파일 다운로드 API")
 public class FileDownloadController {

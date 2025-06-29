@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "알림 관리", description = "알림 생성, 수정, 삭제 관련 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationCommandController {
 

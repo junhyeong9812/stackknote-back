@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "User Commands", description = "사용자 명령 관리 API")
 public class UserCommandController {

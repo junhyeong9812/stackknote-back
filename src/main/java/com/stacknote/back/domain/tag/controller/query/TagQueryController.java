@@ -23,7 +23,7 @@ import java.util.List;
 @Tag(name = "태그 조회", description = "태그 조회 관련 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/tags")
+@RequestMapping("/tags")
 @RequiredArgsConstructor
 public class TagQueryController {
 

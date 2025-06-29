@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces")
+@RequestMapping("/workspaces")
 @RequiredArgsConstructor
 @Tag(name = "Workspace Queries", description = "워크스페이스 조회 관리 API")
 public class WorkspaceQueryController {

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces")
+@RequestMapping("/workspaces")
 @RequiredArgsConstructor
 @Tag(name = "Workspace Commands", description = "워크스페이스 명령 관리 API")
 public class WorkspaceCommandController {

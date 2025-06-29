@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/workspaces/{workspaceId}/pages")
+@RequestMapping("/workspaces/{workspaceId}/pages")
 @RequiredArgsConstructor
 @Tag(name = "Page Commands", description = "페이지 명령 관리 API")
 public class PageCommandController {

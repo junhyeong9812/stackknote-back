@@ -1,7 +1,9 @@
-package com.stacknote.back.global.security.config;
+package com.stacknote.back.global.security;
 
 import com.stacknote.back.global.security.JwtAuthenticationEntryPoint;
 import com.stacknote.back.global.security.JwtAuthenticationFilter;
+import com.stacknote.back.global.security.configurer.CustomLoginConfigurer;
+import com.stacknote.back.global.security.configurer.TokenReissueConfigurer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,28 +61,28 @@ public class SecurityConfig {
 
                 // 커스텀 필터 설정 - 새로 추가된 부분
                 .with(new CustomLoginConfigurer(), configurer -> {
-                    configurer.loginProcessingUrl("/api/auth/login");
+                    configurer.loginProcessingUrl("/auth/login");
                 })
                 .with(new TokenReissueConfigurer(), configurer -> {
-                    configurer.reissueUrl("/api/auth/refresh");
+                    configurer.reissueUrl("/auth/refresh");
                 })
 
                 // URL별 권한 설정 - 필터 처리 URL 고려
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입, 상태확인은 여전히 Controller에서 처리
-                        .requestMatchers("/api/auth/register", "/api/auth/status").permitAll()
+                        .requestMatchers("/auth/register", "/auth/status").permitAll()
 
                         // 로그인, 토큰갱신은 필터에서 처리하므로 permitAll
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh").permitAll()
 
                         // 로그아웃은 여전히 Controller에서 처리 (인증 필요)
-                        .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
+                        .requestMatchers("/auth/logout", "/auth/logout-all").authenticated()
 
                         // 기타 설정 (기존과 동일)
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/api/files/**").authenticated()
+                        .requestMatchers("/files/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers

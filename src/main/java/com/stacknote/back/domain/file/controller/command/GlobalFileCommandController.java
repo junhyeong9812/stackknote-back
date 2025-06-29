@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/files")
 @RequiredArgsConstructor
 @Tag(name = "Global File Commands", description = "전역 파일 명령 API")
 public class GlobalFileCommandController {

@@ -26,7 +26,7 @@ import java.util.List;
 @Tag(name = "알림 조회", description = "알림 조회 관련 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationQueryController {
 

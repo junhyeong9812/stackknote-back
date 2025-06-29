@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/files")
 @RequiredArgsConstructor
 @Tag(name = "Global File Queries", description = "전역 파일 조회 API")
 public class GlobalFileQueryController {
