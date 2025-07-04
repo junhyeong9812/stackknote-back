@@ -1,18 +1,46 @@
 # StackNote Backend Application Configuration
 
-# 공통 설정
 spring:
   application:
     name: stacknote-backend
-  
-  profiles:
-    active: dev
-  
+
   # 파일 업로드 설정
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL_AUTO:update}
+    show-sql: ${DB_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${DB_FORMAT_SQL:false}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    defer-datasource-initialization: true
+
+  # 데이터소스 설정 (모두 환경변수 사용)
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      idle-timeout: 300000
+      connection-timeout: 20000
+      validation-timeout: 5000
+
+  # SQL 스크립트 설정
+  sql:
+    init:
+      mode: never
 
 # 서버 설정
 server:
@@ -20,21 +48,21 @@ server:
   servlet:
     context-path: /api
 
-# JWT 설정
+# JWT 설정 (환경변수 사용)
 jwt:
-  secret: stacknote-jwt-secret-key-for-development-environment-should-be-changed-in-production
-  access-token-validity: 30    # 액세스 토큰 유효기간 (분)
-  refresh-token-validity: 120  # 리프레시 토큰 유효기간 (분)
+  secret: ${JWT_SECRET}
+  access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY:30}    # 분
+  refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:120} # 분
 
 # 앱 설정
 app:
-  domain: localhost
-  secure-cookies: false  # 개발환경에서는 false, 운영에서는 true
+  domain: ${APP_DOMAIN:stacknote.com}
+  secure-cookies: ${APP_SECURE_COOKIES:false}
 
 # 파일 업로드 경로
 file:
   upload:
-    path: uploads/
+    path: ${FILE_UPLOAD_PATH:/app/images/}
 
 # Swagger 설정
 springdoc:
@@ -44,3 +72,24 @@ springdoc:
     path: /swagger-ui.html
     display-request-duration: true
     groups-order: DESC
+
+# 데이터 초기화 설정
+data:
+  init:
+    enabled: ${DATA_INIT_ENABLED:false}
+    admin-count: ${DATA_INIT_ADMIN_COUNT:1}
+    user-count: ${DATA_INIT_USER_COUNT:10}
+
+# 로깅 설정
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.stacknote: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.hibernate.SQL: ${LOG_LEVEL_SQL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_SQL_BIND:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE_PATH:/app/logs/stacknote.log}

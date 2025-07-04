@@ -43,7 +43,7 @@ out/
 application-local.yml
 application-dev.yml
 application-prod.yml
-
+application.yml
 ### 로그 파일 ###
 logs/
 *.log
