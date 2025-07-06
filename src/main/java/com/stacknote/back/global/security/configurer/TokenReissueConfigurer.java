@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 public class TokenReissueConfigurer extends AbstractHttpConfigurer<TokenReissueConfigurer, HttpSecurity> {
 
-    private String reissueUrl = "/api/auth/refresh";
+    private String reissueUrl = "/auth/refresh";
 
     /**
      * 토큰 갱신 처리 URL 설정

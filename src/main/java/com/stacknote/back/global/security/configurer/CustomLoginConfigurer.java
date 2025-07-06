@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 public class CustomLoginConfigurer extends AbstractHttpConfigurer<CustomLoginConfigurer, HttpSecurity> {
 
-    private String loginProcessingUrl = "/api/auth/login";
+    private String loginProcessingUrl = "/auth/login";
 
     /**
      * 로그인 처리 URL 설정
