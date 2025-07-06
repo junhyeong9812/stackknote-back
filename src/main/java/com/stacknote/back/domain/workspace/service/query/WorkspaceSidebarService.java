@@ -10,10 +10,10 @@ import com.stacknote.back.domain.user.entity.User;
 import com.stacknote.back.domain.workspace.dto.response.*;
 import com.stacknote.back.domain.workspace.entity.Workspace;
 import com.stacknote.back.domain.workspace.entity.WorkspaceMember;
+import com.stacknote.back.domain.workspace.exception.WorkspaceAccessDeniedException;
+import com.stacknote.back.domain.workspace.exception.WorkspaceNotFoundException;
 import com.stacknote.back.domain.workspace.repository.WorkspaceMemberRepository;
 import com.stacknote.back.domain.workspace.repository.WorkspaceRepository;
-import com.stacknote.back.global.exception.CustomException;
-import com.stacknote.back.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -85,10 +85,10 @@ public class WorkspaceSidebarService {
 
         // 워크스페이스 접근 권한 확인
         Workspace workspace = workspaceRepository.findActiveWorkspaceById(workspaceId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+                .orElseThrow(() -> new WorkspaceNotFoundException("워크스페이스를 찾을 수 없습니다."));
 
         if (!workspace.isMember(currentUser) && workspace.getVisibility() != Workspace.Visibility.PUBLIC) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
+            throw new WorkspaceAccessDeniedException("워크스페이스 접근 권한이 없습니다.");
         }
 
         // 최상위 페이지들 조회
@@ -167,10 +167,9 @@ public class WorkspaceSidebarService {
         // 현재 사용자의 역할 조회
         WorkspaceMember.Role userRole = workspace.getMemberRole(currentUser);
 
-        // 멤버 수 조회
-        int memberCount = (int) workspaceMemberRepository.countByWorkspaceAndRole(
-                workspace, WorkspaceMember.Role.OWNER
-        ) + workspace.getMembers().size();
+        // 멤버 수 조회 (멤버 테이블의 활성 멤버 수 + 소유자 1명)
+        long activeMemberCount = workspaceMemberRepository.countActiveMembers(workspace.getId());
+        int memberCount = (int) (activeMemberCount + 1); // 소유자 포함
 
         // 페이지 수 조회
         int totalPageCount = (int) pageRepository.countByWorkspace(workspace);

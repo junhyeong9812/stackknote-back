@@ -3,13 +3,13 @@ package com.stacknote.back.domain.page.service.command;
 import com.stacknote.back.domain.page.entity.Page;
 import com.stacknote.back.domain.page.entity.PageFavorite;
 import com.stacknote.back.domain.page.entity.PageVisit;
+import com.stacknote.back.domain.page.exception.PageAccessDeniedException;
+import com.stacknote.back.domain.page.exception.PageNotFoundException;
 import com.stacknote.back.domain.page.repository.PageFavoriteRepository;
 import com.stacknote.back.domain.page.repository.PageRepository;
 import com.stacknote.back.domain.page.repository.PageVisitRepository;
 import com.stacknote.back.domain.user.entity.User;
 import com.stacknote.back.domain.workspace.entity.Workspace;
-import com.stacknote.back.global.exception.CustomException;
-import com.stacknote.back.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class PageActionService {
 
         // 페이지 조회 및 권한 확인
         Page page = pageRepository.findActivePageById(pageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PAGE_NOT_FOUND));
+                .orElseThrow(() -> new PageNotFoundException("페이지를 찾을 수 없습니다."));
 
         // 페이지 접근 권한 확인
         validatePageAccess(page, currentUser);
@@ -70,7 +70,7 @@ public class PageActionService {
 
         // 페이지 조회 및 권한 확인
         Page page = pageRepository.findActivePageById(pageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PAGE_NOT_FOUND));
+                .orElseThrow(() -> new PageNotFoundException("페이지를 찾을 수 없습니다."));
 
         // 페이지 접근 권한 확인
         validatePageAccess(page, currentUser);
@@ -108,7 +108,7 @@ public class PageActionService {
 
         // 워크스페이스 멤버 확인
         if (!workspace.isMember(user)) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
+            throw new PageAccessDeniedException("페이지 접근 권한이 없습니다.");
         }
     }
 }
