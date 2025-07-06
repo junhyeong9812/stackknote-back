@@ -176,4 +176,59 @@ public interface PageRepository extends JpaRepository<Page, Long> {
      */
     @Query("SELECT p FROM Page p WHERE p.workspace = :workspace AND p.deletedAt IS NULL ORDER BY p.viewCount DESC, p.updatedAt DESC")
     List<Page> findPopularPagesByWorkspace(@Param("workspace") Workspace workspace, Pageable pageable);
+
+    // ===== 추가된 메서드들 =====
+
+    /**
+     * 사용자가 접근 가능한 모든 워크스페이스의 페이지 검색 (전역 검색용)
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Page p 
+        JOIN p.workspace w
+        LEFT JOIN w.members m
+        WHERE p.deletedAt IS NULL 
+        AND w.deletedAt IS NULL
+        AND w.isActive = true
+        AND (w.owner = :user OR (m.user = :user AND m.isActive = true) OR w.visibility = 'PUBLIC')
+        AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+             OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        ORDER BY p.updatedAt DESC
+        """)
+    List<Page> searchPagesGlobally(@Param("user") User user, @Param("keyword") String keyword, Pageable pageable);
+
+    /**
+     * 페이지와 모든 부모 페이지들을 함께 조회 (경로 구성용)
+     */
+    @Query("""
+        SELECT p FROM Page p 
+        WHERE p.id = :pageId 
+        AND p.deletedAt IS NULL
+        """)
+    Optional<Page> findPageWithPath(@Param("pageId") Long pageId);
+
+    /**
+     * 워크스페이스의 모든 페이지를 계층 구조와 함께 조회
+     */
+    @Query("""
+        SELECT p FROM Page p 
+        LEFT JOIN FETCH p.parent 
+        LEFT JOIN FETCH p.children 
+        WHERE p.workspace = :workspace 
+        AND p.deletedAt IS NULL 
+        ORDER BY p.parent.id NULLS FIRST, p.sortOrder, p.createdAt
+        """)
+    List<Page> findAllPagesWithHierarchy(@Param("workspace") Workspace workspace);
+
+    /**
+     * 특정 페이지가 공개되어 있고 접근 가능한지 확인
+     */
+    @Query("""
+        SELECT COUNT(p) > 0 FROM Page p 
+        JOIN p.workspace w
+        WHERE p.id = :pageId 
+        AND p.deletedAt IS NULL 
+        AND p.isPublished = true 
+        AND w.visibility = 'PUBLIC'
+        """)
+    boolean isPagePubliclyAccessible(@Param("pageId") Long pageId);
 }

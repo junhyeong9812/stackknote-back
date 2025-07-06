@@ -99,4 +99,60 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
         ORDER BY m.role DESC, m.createdAt
         """)
     List<WorkspaceMember> findAdminsByWorkspace(@Param("workspace") Workspace workspace);
+
+    // ===== 추가된 메서드들 =====
+
+    /**
+     * 워크스페이스 ID로 활성 멤버 수 조회 (소유자 제외)
+     */
+    @Query("""
+        SELECT COUNT(m) FROM WorkspaceMember m 
+        WHERE m.workspace.id = :workspaceId 
+        AND m.isActive = true
+        """)
+    long countActiveMembers(@Param("workspaceId") Long workspaceId);
+
+    /**
+     * 워크스페이스의 총 멤버 수 조회 (소유자 포함)
+     * 소유자는 WorkspaceMember 테이블에 없으므로 +1 해야 함
+     */
+    @Query("""
+        SELECT COUNT(m) + 1 FROM WorkspaceMember m 
+        WHERE m.workspace.id = :workspaceId 
+        AND m.isActive = true
+        """)
+    long countTotalMembers(@Param("workspaceId") Long workspaceId);
+
+    /**
+     * 사용자가 속한 워크스페이스 ID 목록 조회
+     */
+    @Query("""
+        SELECT m.workspace.id FROM WorkspaceMember m 
+        WHERE m.user = :user 
+        AND m.isActive = true
+        """)
+    List<Long> findWorkspaceIdsByUser(@Param("user") User user);
+
+    /**
+     * 워크스페이스 멤버와 사용자 정보를 함께 조회 (N+1 문제 해결)
+     */
+    @Query("""
+        SELECT m FROM WorkspaceMember m 
+        JOIN FETCH m.user u 
+        WHERE m.workspace = :workspace 
+        AND m.isActive = true 
+        ORDER BY m.role DESC, m.createdAt
+        """)
+    List<WorkspaceMember> findActiveByWorkspaceWithUser(@Param("workspace") Workspace workspace);
+
+    /**
+     * 특정 사용자가 특정 역할을 가진 워크스페이스 수 조회
+     */
+    @Query("""
+        SELECT COUNT(m) FROM WorkspaceMember m 
+        WHERE m.user = :user 
+        AND m.role = :role 
+        AND m.isActive = true
+        """)
+    long countByUserAndRole(@Param("user") User user, @Param("role") WorkspaceMember.Role role);
 }

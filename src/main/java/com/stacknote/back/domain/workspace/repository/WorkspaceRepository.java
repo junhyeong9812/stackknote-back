@@ -121,4 +121,70 @@ public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
         AND (w.owner = :user OR (m.user = :user AND m.isActive = true))
         """)
     long countWorkspacesByUser(@Param("user") User user);
+
+    // ===== 추가된 메서드들 =====
+
+    /**
+     * 사용자의 개인 워크스페이스 조회
+     * 일반적으로 "사용자명의 워크스페이스" 형태의 이름을 가진 워크스페이스
+     */
+    @Query("""
+        SELECT w FROM Workspace w 
+        WHERE w.owner = :user 
+        AND w.deletedAt IS NULL 
+        AND w.isActive = true 
+        AND (w.name = :personalName1 OR w.name = :personalName2)
+        """)
+    Optional<Workspace> findPersonalWorkspace(
+            @Param("user") User user,
+            @Param("personalName1") String personalName1,
+            @Param("personalName2") String personalName2
+    );
+
+    /**
+     * 워크스페이스와 멤버 정보를 함께 조회 (N+1 문제 해결)
+     */
+    @Query("""
+        SELECT DISTINCT w FROM Workspace w 
+        LEFT JOIN FETCH w.members m 
+        LEFT JOIN FETCH m.user 
+        WHERE w.id = :workspaceId 
+        AND w.deletedAt IS NULL 
+        AND w.isActive = true
+        """)
+    Optional<Workspace> findWorkspaceWithMembers(@Param("workspaceId") Long workspaceId);
+
+    /**
+     * 사용자가 속한 워크스페이스 목록을 역할과 함께 조회
+     */
+    @Query("""
+        SELECT w, CASE 
+            WHEN w.owner = :user THEN 'OWNER'
+            ELSE m.role 
+        END as userRole
+        FROM Workspace w 
+        LEFT JOIN w.members m ON m.user = :user AND m.isActive = true
+        WHERE w.deletedAt IS NULL 
+        AND w.isActive = true 
+        AND (w.owner = :user OR m.user = :user)
+        ORDER BY w.updatedAt DESC
+        """)
+    List<Object[]> findWorkspacesWithUserRole(@Param("user") User user);
+
+    /**
+     * 워크스페이스 이름과 설명으로 검색 (전역 검색용)
+     */
+    @Query("""
+        SELECT w FROM Workspace w 
+        WHERE w.deletedAt IS NULL 
+        AND w.isActive = true 
+        AND (w.visibility = 'PUBLIC' OR w.owner = :user OR EXISTS (
+            SELECT 1 FROM WorkspaceMember m 
+            WHERE m.workspace = w AND m.user = :user AND m.isActive = true
+        ))
+        AND (LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+             OR LOWER(w.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        ORDER BY w.updatedAt DESC
+        """)
+    List<Workspace> searchAccessibleWorkspaces(@Param("user") User user, @Param("keyword") String keyword);
 }
