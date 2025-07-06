@@ -4,6 +4,14 @@ spring:
   application:
     name: stacknote-backend
 
+  # Jackson 설정 추가 (spring 아래에 위치)
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: Asia/Seoul
+
   # 파일 업로드 설정
   servlet:
     multipart:

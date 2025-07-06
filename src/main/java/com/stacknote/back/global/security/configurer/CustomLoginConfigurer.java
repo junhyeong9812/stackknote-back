@@ -9,6 +9,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 /**
  * 커스텀 로그인 필터 설정을 위한 Configurer
@@ -34,33 +36,31 @@ public class CustomLoginConfigurer extends AbstractHttpConfigurer<CustomLoginCon
         // AuthenticationManager 가져오기
         AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
 
-        // ApplicationContext에서 필요한 빈들 가져오기
-        AuthCommandService authCommandService = http.getSharedObject(AuthCommandService.class);
-        if (authCommandService == null) {
-            authCommandService = getBuilder().getSharedObject(AuthCommandService.class);
-        }
+        // ApplicationContext를 통해 빈 가져오기
+        org.springframework.context.ApplicationContext context =
+                http.getSharedObject(org.springframework.context.ApplicationContext.class);
 
-        CookieUtil cookieUtil = http.getSharedObject(CookieUtil.class);
-        if (cookieUtil == null) {
-            cookieUtil = getBuilder().getSharedObject(CookieUtil.class);
-        }
+        AuthCommandService authCommandService = context.getBean(AuthCommandService.class);
+        CookieUtil cookieUtil = context.getBean(CookieUtil.class);
+        ObjectMapper objectMapper = context.getBean(ObjectMapper.class); // ObjectMapper 추가
 
         // CustomLoginFilter 생성 및 설정
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
                 authCommandService,
-                cookieUtil
+                cookieUtil,
+                objectMapper
         );
 
         // 필터 기본 설정
         customLoginFilter.setFilterProcessesUrl(loginProcessingUrl);
         customLoginFilter.setAuthenticationManager(authenticationManager);
 
-        // 성공/실패 핸들러 설정
+        // 성공/실패 핸들러 설정 - ObjectMapper 전달
         customLoginFilter.setAuthenticationSuccessHandler(
-                new CustomAuthenticationSuccessHandler(cookieUtil)
+                new CustomAuthenticationSuccessHandler(cookieUtil, objectMapper) // objectMapper 추가
         );
         customLoginFilter.setAuthenticationFailureHandler(
-                new CustomAuthenticationFailureHandler()
+                new CustomAuthenticationFailureHandler(objectMapper) // objectMapper 추가
         );
 
         // POST 요청만 처리하도록 설정

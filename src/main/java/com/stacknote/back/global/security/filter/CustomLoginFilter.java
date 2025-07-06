@@ -17,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
+
 import java.io.IOException;
 
 /**
@@ -29,7 +30,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthCommandService authCommandService;
     private final CookieUtil cookieUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     /**
      * 인증 시도 - JSON 요청 본문에서 로그인 정보 추출

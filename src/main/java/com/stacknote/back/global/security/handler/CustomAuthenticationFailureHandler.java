@@ -7,6 +7,7 @@ import com.stacknote.back.global.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,9 +25,10 @@ import java.nio.charset.StandardCharsets;
  * 로그인 실패 시 JSON 응답 처리 및 상세한 에러 메시지 제공
  */
 @Slf4j
+@RequiredArgsConstructor
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationFailure(

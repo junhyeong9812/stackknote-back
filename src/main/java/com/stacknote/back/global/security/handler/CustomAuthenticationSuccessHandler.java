@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+
 /**
  * 커스텀 인증 성공 핸들러
  * 로그인 성공 시 JSON 응답 처리
@@ -24,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final CookieUtil cookieUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationSuccess(
