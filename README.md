@@ -338,4 +338,3 @@ enum PageVisibility {
 ## 🔗 관련 링크
 - **백엔드 저장소**: [StackNote Backend](../stacknote-back)
 - **API 문서**: http://localhost:8080/api/swagger-ui.html
-- **배포 URL**: https://stacknote.vercel.app
